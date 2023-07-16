@@ -1,19 +1,23 @@
-# pyproto
- Python Protobuf
+### Install
+```
+pip install python-protobuf
+```
 
+### Example
 ```py
 from pyproto import Protobuf
 
-print("测试protobuf与bytes互相转换")
-bs = bytes.fromhex("12001a0022020801")  # 一段protobuf的bytes数据
+print("Test the conversion between protobuf and bytes")
+bs = bytes.fromhex("12001a0022020801") # A section of bytes data of protobuf
 print("src:", bs.hex())
-proto = ProtoBuf(bs)  # 将bytes转为protobuf对象
-proto.dump()  # 打印proto对象
-bs2 = proto.toBuf()  # 将proto对象转换成bytes
+proto = ProtoBuf(bs)  # Convert bytes to protobuf objects
+proto.dump()  # print proto object
+bs2 = proto.toBuf()  # Convert the proto object to bytes
 print(bs2 == bs, bs2.hex())
 
-print("proto对象与dict对象的互相转换")
-# 一个复杂的dict对象
+print("Mutual conversion between proto object and dict object")
+# A complex dict object
+
 d = {
     6: {
         1: {
@@ -26,13 +30,16 @@ d = {
     }
 }
 
-# 一个未赋值的dict对象模板
+# An unassigned dict object template
+
 d2 = {6: {1: {1: ""}, 3: "", 4: {1: 0}, 5: {1: 0}, 6: {2: "", 3: "", 4: {1: 0}}}}
 print("src:", d)
-pb = ProtoBuf(d)  # 将dict对象转换成protobuf对象
+pb = ProtoBuf(d)  # Convert dict object to protobuf object
+
 pb.dump()
 
-d3 = pb.toDict(d2)  # 将protobuf对象转换成dict对象
+d3 = pb.toDict(d2)  # Convert protobuf object to dict object
+
 print("d3 == d2 ->", d3 == d2, d3 is d2, d3)
 print("d3 == d  ->", d3 == d, d3 is d)
 ```
