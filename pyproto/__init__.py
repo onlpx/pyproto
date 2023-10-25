@@ -40,9 +40,9 @@ class ProtoField:
 
     def __str__(self):
         if (
-            (self.type == ProtoFieldType.INT32)
-            or (self.type == ProtoFieldType.INT64)
-            or (self.type == ProtoFieldType.VARINT)
+                (self.type == ProtoFieldType.INT32)
+                or (self.type == ProtoFieldType.INT64)
+                or (self.type == ProtoFieldType.VARINT)
         ):
             return "%d(%s): %d" % (self.idx, self.type.name, self.val)
         elif self.type == ProtoFieldType.STRING:
@@ -55,7 +55,7 @@ class ProtoField:
             else:
                 return '%d(%s): h"%s"' % (self.idx, self.type.name, self.val.hex())
         elif (self.type == ProtoFieldType.GROUPSTART) or (
-            self.type == ProtoFieldType.GROUPEND
+                self.type == ProtoFieldType.GROUPEND
         ):
             return "%d(%s): %s" % (self.idx, self.type.name, self.val)
         else:
@@ -81,7 +81,7 @@ class ProtoReader:
 
     def read(self, length):
         assert self.isRemain(length)
-        ret = self.data[self.pos : self.pos + length]
+        ret = self.data[self.pos: self.pos + length]
         self.pos += length
         return ret
 
@@ -183,6 +183,8 @@ class ProtoBuf:
                 self.put(ProtoField(field_idx, field_type, reader.readVarint()))
             elif field_type == ProtoFieldType.STRING:
                 self.put(ProtoField(field_idx, field_type, reader.readString()))
+            elif field_type == ProtoFieldType.GROUPEND:
+                pass
             else:
                 raise ProtoError(
                     "parse protobuf error, unexpected field type: %s"
@@ -227,9 +229,9 @@ class ProtoBuf:
         if pf == None:
             return 0
         if (
-            (pf.type == ProtoFieldType.INT32)
-            or (pf.type == ProtoFieldType.INT64)
-            or (pf.type == ProtoFieldType.VARINT)
+                (pf.type == ProtoFieldType.INT32)
+                or (pf.type == ProtoFieldType.INT64)
+                or (pf.type == ProtoFieldType.VARINT)
         ):
             return pf.val
         raise ProtoError("getInt(%d) -> %s" % (idx, pf.type))
@@ -307,6 +309,24 @@ class ProtoBuf:
             else:
                 raise ProtoError("unsupport type(%s) to protobuf" % (type(v)))
         return out
+
+    def toDictAuto(self):
+        """Automatic conversion to dict"""
+        result = {}
+        for field in self.fields:
+            key = field.idx
+            if field.type in (ProtoFieldType.INT32, ProtoFieldType.INT64, ProtoFieldType.VARINT):
+                result[key] = field.val
+            elif field.type == ProtoFieldType.STRING:
+                if field.isAsciiStr():
+                    result[key] = field.val.decode("utf-8")
+                else:
+                    value = ProtoBuf(field.val).toDictAuto()
+                    if not value:
+                        value = field.val
+                    result[key] = value
+
+        return result
 
 
 def parse(path):
